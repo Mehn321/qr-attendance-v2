@@ -7,6 +7,8 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Image,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -43,6 +45,20 @@ export default function Dashboard() {
       router.replace("/");
     }
   }, [token]);
+
+  // Prevent back button from logging out
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        // Return true to prevent default back button behavior
+        // This keeps the user on the dashboard
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -169,11 +185,18 @@ export default function Dashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Welcome back!</Text>
-            <Text style={styles.teacherName}>
-              {teacher?.fullName || "Teacher"}
-            </Text>
+          <View style={styles.headerLeft}>
+            <Image
+              source={require("../../assets/Logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <View>
+              <Text style={styles.greeting}>Welcome</Text>
+              <Text style={styles.teacherName}>
+                {teacher?.fullName || "Teacher"}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutText}>Logout</Text>
@@ -315,6 +338,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  logo: {
+    width: 48,
+    height: 48,
   },
   greeting: {
     fontSize: 14,

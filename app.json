@@ -10,7 +10,7 @@
       "web"
     ],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Logo.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -23,7 +23,6 @@
       "**/*"
     ],
     "ios": {
-      "supportsTabletMode": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Camera access is required to scan QR codes"
       }
