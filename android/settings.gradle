@@ -1,0 +1,35 @@
+import java.nio.file.Paths
+
+pluginManagement {
+  def parentDir = rootDir.parentFile
+
+  repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+  }
+  
+  includeBuild(Paths.get(parentDir.toString(), "node_modules", "@react-native", "gradle-plugin").toAbsolutePath().toString())
+  includeBuild(Paths.get(parentDir.toString(), "node_modules", "expo-modules-autolinking", "android", "expo-gradle-plugin").toAbsolutePath().toString())
+}
+
+plugins {
+  id("com.facebook.react.settings")
+  id("expo-autolinking-settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+  if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
+    ex.autolinkLibrariesFromCommand()
+  } else {
+    ex.autolinkLibrariesFromCommand(expoAutolinking.rnConfigCommand)
+  }
+}
+expoAutolinking.useExpoModules()
+
+rootProject.name = 'QR Attendance'
+
+expoAutolinking.useExpoVersionCatalog()
+
+include ':app'
+includeBuild(expoAutolinking.reactNativeGradlePlugin)
