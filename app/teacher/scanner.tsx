@@ -69,15 +69,15 @@ export default function TeacherScanner() {
     try {
       const stored = await AsyncStorage.getItem('studentCooldowns');
       if (stored) {
-        const data = JSON.parse(stored);
+        const data: Record<string, number> = JSON.parse(stored);
         // Clean up old entries (>24 hours)
         const now = Date.now();
         const cleaned = Object.fromEntries(
-          Object.entries(data).filter(([, timestamp]: [string, any]) => {
+          Object.entries(data).filter(([, timestamp]) => {
             return now - timestamp < 86400000;
           })
         );
-        setCooldowns(cleaned);
+        setCooldowns(cleaned as Record<string, number>);
       }
     } catch (err) {
       console.error('Error loading cooldowns:', err);
@@ -193,7 +193,7 @@ export default function TeacherScanner() {
         }
         const qrData = `${fullName} ${studentId} ${parsed.department}`;
         // ✅ CRITICAL: Pass teacherId as first parameter
-        response = await offlineApi.scanAttendance(teacherId, selectedSectionId, qrData);
+        response = await offlineApi.scanAttendance(teacherId || "", selectedSectionId || "", qrData);
       } else {
         console.log('🔌 Using ONLINE MODE');
         const apiResponse = await apiClient.post('/attendance/scan', {
@@ -535,10 +535,9 @@ const styles = StyleSheet.create({
   error: {
     color: '#FF3B30',
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     marginHorizontal: 20,
     backgroundColor: 'rgba(255, 59, 48, 0.2)',
-    color: '#FF9999',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 4,

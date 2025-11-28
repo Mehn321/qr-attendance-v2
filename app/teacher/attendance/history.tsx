@@ -229,16 +229,16 @@ export default function AttendanceHistory() {
       console.log("🔍 Filtering by subject:", selectedSubject);
       console.log("📍 Using map:", sectionSubjectMap);
       filtered = filtered.filter((record) => {
-        const recordSectionId = record.sectionId;
-        const recordSubjectId = sectionSubjectMap.get(recordSectionId);
-        console.log(
-          `  Record ${
-            record.studentId
-          }: sectionId=${recordSectionId}, subjectId=${recordSubjectId}, selected=${selectedSubject}, match=${
-            recordSubjectId === selectedSubject
-          }`
-        );
-        return recordSubjectId === selectedSubject;
+         const recordSectionId = record.sectionId || "";
+         const recordSubjectId = sectionSubjectMap.get(recordSectionId) || "";
+         console.log(
+           `  Record ${
+             record.studentId
+           }: sectionId=${recordSectionId}, subjectId=${recordSubjectId}, selected=${selectedSubject}, match=${
+             recordSubjectId === (selectedSubject || "")
+           }`
+         );
+        return recordSubjectId === (selectedSubject || "");
       });
     }
 

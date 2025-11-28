@@ -43,9 +43,9 @@ export default function CreateSection() {
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE');
         await offlineApi.createSection(
-          teacherId,
+          teacherId || "",
           name.trim(),
-          subjectId,
+          subjectId || "",
           description.trim()
         );
       } else {

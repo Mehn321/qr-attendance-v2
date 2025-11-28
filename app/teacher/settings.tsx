@@ -167,14 +167,9 @@ export default function Settings() {
             <Text style={styles.sectionTitle}>Account Information</Text>
             <View style={styles.infoCard}>
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Name</Text>
-                <Text style={styles.infoValue}>{teacher?.fullName || "N/A"}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Email</Text>
-                <Text style={styles.infoValue}>{teacher?.email || "N/A"}</Text>
-              </View>
+                 <Text style={styles.infoLabel}>Name</Text>
+                 <Text style={styles.infoValue}>{teacher?.fullName || "N/A"}</Text>
+               </View>
             </View>
           </View>
 

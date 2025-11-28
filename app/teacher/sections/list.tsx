@@ -41,7 +41,7 @@ export default function SectionsList() {
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE');
         const { teacherId } = authStore.getState();
-        sections = await offlineApi.getSections(teacherId);
+        sections = await offlineApi.getSections(teacherId || "");
       } else {
         console.log('🔌 Using ONLINE MODE');
         const response = await apiClient.get('/sections');

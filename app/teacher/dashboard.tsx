@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Image,
   BackHandler,
+  Alert,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -158,7 +159,7 @@ export default function Dashboard() {
 
   const handleStartScanning = () => {
     if (subjects.length === 0) {
-      alert("Please create a subject first");
+      Alert.alert("Error", "Please create a subject first");
       return;
     }
     router.push("/teacher/session/choose-section-before-scan");

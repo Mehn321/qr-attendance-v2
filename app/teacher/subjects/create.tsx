@@ -38,7 +38,7 @@ export default function CreateSubject() {
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE');
         await offlineApi.createSubject(
-          teacherId,
+          teacherId || "",
           name.trim(),
           description.trim()
         );

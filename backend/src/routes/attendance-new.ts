@@ -139,7 +139,7 @@ router.get('/section/:sectionId', authenticateToken, async (req: AuthRequest, re
 
     res.json({
       section: section.name,
-      records: records.map(r => ({
+      records: records.map((r: any) => ({
         studentId: r.studentId,
         studentName: r.studentName,
         course: r.course,
