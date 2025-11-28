@@ -33,11 +33,11 @@ interface ScanLog {
 }
 
 export default function TeacherScanner() {
-   const router = useRouter();
-   const insets = useSafeAreaInsets();
-   const { selectedSection, selectedSectionId, teacherId } = authStore();
-   const [permission, requestPermission] = useCameraPermissions();
-   const cameraRef = useRef<CameraView>(null);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { selectedSection, selectedSectionId, teacherId } = authStore();
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
 
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -173,14 +173,14 @@ export default function TeacherScanner() {
       ]);
 
       setError(message);
-       setTimeout(() => {
-         setScanned(false);
-         lastScannedRef.current = '';
-       }, 2000);
-       return;
+      setTimeout(() => {
+        setScanned(false);
+        lastScannedRef.current = '';
+      }, 2000);
+      return;
       }
 
-    // Process scan on server
+      // Process scan on server
     setLoading(true);
 
     try {
@@ -268,7 +268,7 @@ export default function TeacherScanner() {
     }
     };
 
-  const handleEndSession = () => {
+    const handleEndSession = () => {
     Alert.alert(
       'End Session?',
       `Are you sure? You'll need to select a new section to continue scanning.`,

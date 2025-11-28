@@ -199,31 +199,31 @@ export default function StudentScan() {
         lastScannedRef.current = '';
       }, 1000);
     }
-    };
+  };
 
-    if (!permission) {
+  if (!permission) {
     return (
-     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-       <Text style={styles.centerText}>Requesting camera permission...</Text>
-     </SafeAreaView>
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <Text style={styles.centerText}>Requesting camera permission...</Text>
+      </SafeAreaView>
     );
-    }
+  }
 
-    if (!permission.granted) {
+  if (!permission.granted) {
     return (
-     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-         <Text style={styles.centerText}>Camera permission denied</Text>
-         <TouchableOpacity
-           style={{ marginTop: 20, padding: 10, backgroundColor: '#007AFF', borderRadius: 5 }}
-           onPress={requestPermission}
-         >
-           <Text style={{ color: '#fff' }}>Grant Permission</Text>
-         </TouchableOpacity>
-       </View>
-     </SafeAreaView>
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={styles.centerText}>Camera permission denied</Text>
+          <TouchableOpacity
+            style={{ marginTop: 20, padding: 10, backgroundColor: '#007AFF', borderRadius: 5 }}
+            onPress={requestPermission}
+          >
+            <Text style={{ color: '#fff' }}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
-    }
+  }
 
   return (
     <View style={styles.scannerContainer}>

@@ -658,29 +658,29 @@ class OfflineAPI {
 
   // GET ATTENDANCE FOR SECTION
   async getAttendance(teacherId: string, sectionId: string) {
-     try {
-       // ✅ NEW: Verify section belongs to teacher
-       const sections = await this.getSectionsData();
-       const section = sections.find(s => s.id === sectionId && s.teacherId === teacherId);
-       
-       if (!section) {
-         console.warn(`Access denied: section ${sectionId} does not belong to teacher ${teacherId}`);
-         return [];
-       }
+    try {
+      // ✅ NEW: Verify section belongs to teacher
+      const sections = await this.getSectionsData();
+      const section = sections.find(s => s.id === sectionId && s.teacherId === teacherId);
+      
+      if (!section) {
+        console.warn(`Access denied: section ${sectionId} does not belong to teacher ${teacherId}`);
+        return [];
+      }
 
-       const attendance = await this.getAttendanceData();
-       // ✅ CRITICAL: Filter by both teacher AND section
-       return attendance
-         .filter((a) => a.teacherId === teacherId && a.sectionId === sectionId)
-         .sort(
-           (a, b) =>
-             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-         );
-     } catch (err) {
-       console.error('Get attendance error:', err);
-       return [];
-     }
-   }
+      const attendance = await this.getAttendanceData();
+      // ✅ CRITICAL: Filter by both teacher AND section
+      return attendance
+        .filter((a) => a.teacherId === teacherId && a.sectionId === sectionId)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    } catch (err) {
+      console.error('Get attendance error:', err);
+      return [];
+    }
+  }
 
   // GET ALL ATTENDANCE (for history/reports)
   async getAllAttendance() {
@@ -762,16 +762,16 @@ class OfflineAPI {
       await this.saveTeachers(teachers);
 
       console.log('✅ Password changed successfully');
-       return {
-         success: true,
-         message: 'Password changed successfully',
-       };
+      return {
+        success: true,
+        message: 'Password changed successfully',
+      };
       } catch (err) {
-       console.error('Change password error:', err);
-       return {
-         success: false,
-         message: 'Failed to change password',
-       };
+      console.error('Change password error:', err);
+      return {
+        success: false,
+        message: 'Failed to change password',
+      };
       }
       }
       }
