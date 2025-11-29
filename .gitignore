@@ -12,10 +12,5 @@ web-build/
 .env
 .env.local
 .DS_Store
-/android/*
-!/android/gradlew
-!/android/gradlew.bat
-!/android/gradle/
-!/android/build.gradle
-!/android/settings.gradle
+/android
 /ios
