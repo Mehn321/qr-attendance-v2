@@ -45,7 +45,10 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinCompilerJvmTarget": "11"
+            "kotlinCompilerJvmTarget": "11",
+            "compileSDKVersion": 36,
+            "targetSDKVersion": 36,
+            "minSDKVersion": 24
           }
         }
       ]
