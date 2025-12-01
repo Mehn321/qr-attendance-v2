@@ -4,11 +4,7 @@
     "slug": "qr-attendance-v2",
     "version": "1.0.0",
     "scheme": "qrattendance",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
     "icon": "./assets/Logo.png",
     "splash": {
@@ -19,9 +15,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "infoPlist": {
         "NSCameraUsageDescription": "Camera access is required to scan QR codes"
@@ -51,7 +45,7 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinCompilerJvmTarget": "17"
+            "kotlinCompilerJvmTarget": "11"
           }
         }
       ]
