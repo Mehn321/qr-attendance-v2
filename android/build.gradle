@@ -1,20 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-buildscript {
-  repositories {
-    google()
-    mavenCentral()
-  }
-  dependencies {
-    classpath('com.android.tools.build:gradle')
-    classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
-  }
+// Define version constants for all subprojects
+ext {
+    buildToolsVersion = "34.0.0"
+    minSdkVersion = 23
+    compileSdkVersion = 34
+    targetSdkVersion = 34
+    ndkVersion = "26.1.10909125"
+    javaVersion = JavaVersion.VERSION_17
 }
 
-// ========== GLOBAL JVM VERSION SETTING ==========
-// Must be set BEFORE plugin application
-ext.javaVersion = JavaVersion.VERSION_17
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
+    }
+}
 
 allprojects {
   repositories {
@@ -22,24 +28,23 @@ allprojects {
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
   }
-  
-  // Apply EARLY to prevent module override
-  configurations.all {
-    resolutionStrategy {
-      // Force consistent compilation across all tasks
-      eachDependency { DependencyResolveDetails details ->
-        // This ensures dependency compatibility
+}
+
+// ========== GLOBAL JVM VERSION SETTING ==========
+// Must be set BEFORE plugin application
+ext.javaVersion = JavaVersion.VERSION_17
+
+// ========== AGGRESSIVE JVM 17 ENFORCEMENT ==========
+// This runs IMMEDIATELY after all projects load
+subprojects { project ->
+  gradle.projectsLoaded {
+    gradle.allprojects { proj ->
+      proj.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { task ->
+        task.kotlinOptions.jvmTarget = '17'
+        println "[AGGRESSIVE OVERRIDE] ${proj.name}:${task.name} forced to jvmTarget=17"
       }
     }
   }
-}
-
-apply plugin: "expo-root-project"
-apply plugin: "com.facebook.react.rootproject"
-
-// ========== AGGRESSIVE JVM 11 ENFORCEMENT ==========
-// This runs IMMEDIATELY after all projects load
-subprojects { project ->
   // Apply BEFORE evaluation - prevents module override
   beforeEvaluate {
     if (project.hasProperty('android')) {
@@ -66,11 +71,11 @@ subprojects { project ->
 
     // Override JavaCompile tasks - MUST happen after evaluation
     project.tasks.all { task ->
-      if (task instanceof JavaCompile) {
+      if (task.getClass().getName() == 'org.gradle.api.tasks.compile.JavaCompile') {
         task.sourceCompatibility = '17'
         task.targetCompatibility = '17'
         task.options.release.set(17)
-        println "JavaCompile for ${project.name}: forced to Java 11"
+        println "JavaCompile for ${project.name}: forced to Java 17"
       }
     }
 
@@ -78,14 +83,14 @@ subprojects { project ->
     project.tasks.all { task ->
       if (task.class.simpleName == 'KotlinCompile' || task.class.name.contains('KotlinCompile')) {
         task.kotlinOptions.jvmTarget = '17'
-        println "KotlinCompile for ${project.name}: forced to jvmTarget 11"
+        println "KotlinCompile for ${project.name}: forced to jvmTarget 17"
       }
     }
   }
 }
 
 // ========== JVM TOOLCHAIN ENFORCEMENT (Gradle 6.7+) ==========
-// This ensures Java compilation uses JVM 11 consistently
+// This ensures Java compilation uses JVM 17 consistently
 plugins.withId('java') {
   project.extensions.configure(JavaPluginExtension) { ext ->
     ext.toolchain {
