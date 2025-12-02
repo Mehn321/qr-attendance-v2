@@ -15,8 +15,7 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk",
-        "image": "latest",
-        "java": "17"
+        "image": "latest"
       }
     },
     "production": {
