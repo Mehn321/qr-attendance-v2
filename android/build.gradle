@@ -101,3 +101,13 @@ allprojects {
     }
   }
 }
+
+// ========== FORCE KOTLIN ANDROID TOOLCHAIN ==========
+// Required for Android libraries to use JVM 17
+allprojects {
+  plugins.withId('org.jetbrains.kotlin.android') {
+    kotlin {
+      jvmToolchain(17)
+    }
+  }
+}
