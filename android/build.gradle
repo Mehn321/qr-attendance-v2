@@ -83,3 +83,21 @@ subprojects { project ->
     }
   }
 }
+
+// ========== JVM TOOLCHAIN ENFORCEMENT (Gradle 6.7+) ==========
+// This ensures Java compilation uses JVM 11 consistently
+plugins.withId('java') {
+  project.extensions.configure(JavaPluginExtension) { ext ->
+    ext.toolchain {
+      languageVersion = JavaLanguageVersion.of(11)
+    }
+  }
+}
+
+allprojects {
+  plugins.withId('org.jetbrains.kotlin.jvm') {
+    kotlin {
+      jvmToolchain(11)
+    }
+  }
+}
