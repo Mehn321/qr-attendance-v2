@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authStore } from '../store/authStore';
@@ -8,13 +8,30 @@ export default function Landing() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { token } = authStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Auto-redirect if already authenticated
-    if (token) {
-      router.replace('/teacher/dashboard');
+    try {
+      // Auto-redirect if already authenticated
+      if (token) {
+        router.replace('/teacher/dashboard');
+      }
+    } catch (error) {
+      console.error('Error in Landing:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, [token]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.content}>
+          <ActivityIndicator size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
