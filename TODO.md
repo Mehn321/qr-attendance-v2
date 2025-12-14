@@ -1,0 +1,6 @@
+- [x] Move project to C:\qr-attendance-v2 to shorten path
+- [x] Navigate to new project directory
+- [x] Clean previous build artifacts
+- [x] Attempt build again
+- [x] Fix password trimming inconsistency in login and registration to match change password behavior
+- [x] Ensure change password uses same database/entity as login and signup (email-based verification)

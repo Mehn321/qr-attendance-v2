@@ -44,7 +44,7 @@ export default function LoginStep1() {
       
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE');
-        response = await offlineApi.loginStep1(email.trim(), password);
+        response = await offlineApi.loginStep1(email.trim(), password.trim());
       } else {
         console.log('🔌 Using ONLINE MODE');
         const apiResponse = await apiClient.post('/teacher/login/step1', {

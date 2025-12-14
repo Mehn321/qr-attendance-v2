@@ -256,7 +256,14 @@ class OfflineAPI {
         };
       }
 
+      console.log('🔍 Login attempt for email:', email);
+      console.log('   Teacher found:', !!teacher);
+      console.log('   Teacher ID:', teacher?.id);
+      console.log('   Stored hash length:', teacher?.passwordHash?.length);
+      
       const isMatch = verifyPassword(password, teacher.passwordHash);
+
+      console.log('   Password match result:', isMatch);
 
       if (!isMatch) {
         return {
@@ -264,7 +271,6 @@ class OfflineAPI {
           message: 'Email or password incorrect',
         };
       }
-
       return {
         success: true,
         tempToken: 'offline_temp_' + teacher.id,
@@ -276,7 +282,7 @@ class OfflineAPI {
   }
 
   // LOGIN STEP 2 - Enhanced with detailed QR validation
-  async loginStep2(tempToken: string, qrCodeData: string) {
+  async loginStep2(tempToken: string, qrCodeData: string, loginEmail?: string) {
     try {
       // Parse QR code: NAME ID PROGRAM
       const parseQR = (qr: string) => {
@@ -341,15 +347,19 @@ class OfflineAPI {
 
       console.log('✅ QR Code verified, login successful');
       
-      // ✅ NEW: Save current teacher ID for offline mode
+      // ✅ CRITICAL: Save the email used for login (loginEmail), not the database email
+      // This ensures password change uses the correct email
+      const emailToSave = loginEmail || teacher.email;
+      console.log('💾 Saving email for offline mode:', emailToSave);
       await AsyncStorage.setItem('lastTeacherId', teacher.id);
+      await AsyncStorage.setItem('lastTeacherEmail', emailToSave);
       
       return {
         success: true,
         token: 'offline_token_' + teacher.id,
         teacherId: teacher.id,
         fullName: teacher.fullName,
-        email: teacher.email,
+        email: emailToSave,
       };
       } catch (err) {
       console.error('Login Step 2 error:', err);
@@ -706,43 +716,64 @@ class OfflineAPI {
     }
   }
 
-  // CHANGE PASSWORD
-  async changePassword(currentPassword: string, newPassword: string) {
+  // CHANGE PASSWORD - Use email-only lookup to avoid ID duplication issues
+  async changePassword(currentPassword: string, newPassword: string, teacherEmail?: string) {
     try {
-      // Get current user from auth store (in real app, you'd have access to current teacher ID)
-      // For offline mode, we'll use the last logged-in teacher from AsyncStorage
-      const lastTeacherId = await AsyncStorage.getItem('lastTeacherId');
+      // Get current user email from parameter or storage
+      let targetEmail = teacherEmail || await AsyncStorage.getItem('lastTeacherEmail');
       
-      if (!lastTeacherId) {
+      console.log('🔐 Change password attempt');
+      console.log('   Email provided:', teacherEmail);
+      console.log('   Email from storage:', await AsyncStorage.getItem('lastTeacherEmail'));
+      
+      if (!targetEmail) {
         return {
           success: false,
-          message: 'Teacher not found',
+          message: 'Teacher not found - please log in again',
         };
       }
 
       const teachers = await this.getTeachers();
-      const teacherIndex = teachers.findIndex(t => t.id === lastTeacherId);
+      
+      // Find teacher by EMAIL ONLY (avoid ID duplication issues)
+      const teacherIndex = teachers.findIndex(t => t.email === targetEmail);
+      
+      console.log('   Total teachers in DB:', teachers.length);
+      console.log('   Teacher found by email:', teacherIndex !== -1);
 
       if (teacherIndex === -1) {
         return {
           success: false,
-          message: 'Teacher not found',
+          message: 'Teacher account not found - please register again',
         };
       }
 
       const teacher = teachers[teacherIndex];
+      console.log('   Found teacher ID:', teacher.id);
 
       // Verify current password
-      const passwordMatch = verifyPassword(currentPassword, teacher.passwordHash);
+      const trimmedPw = currentPassword.trim();
+      
+      // Try password verification
+      let passwordMatch = verifyPassword(trimmedPw, teacher.passwordHash);
+      
+      if (!passwordMatch) {
+        // Try without trim
+        passwordMatch = verifyPassword(currentPassword, teacher.passwordHash);
+      }
+      
+      console.log('✓ Password match result:', passwordMatch);
+      
       if (!passwordMatch) {
         return {
           success: false,
-          message: 'Current password is incorrect',
+          message: 'Current password is incorrect. Please verify you are using the correct password.',
         };
       }
 
       // Check if new password is different
-      const isSamePassword = verifyPassword(newPassword, teacher.passwordHash);
+      const trimmedNew = newPassword.trim();
+      const isSamePassword = verifyPassword(trimmedNew, teacher.passwordHash);
       if (isSamePassword) {
         return {
           success: false,
@@ -751,33 +782,168 @@ class OfflineAPI {
       }
 
       // Hash new password
-      const newPasswordHash = hashPassword(newPassword);
+      const newPasswordHash = hashPassword(trimmedNew);
 
       // Update teacher
+      const oldHash = teacher.passwordHash;
       teachers[teacherIndex] = {
         ...teacher,
         passwordHash: newPasswordHash,
       };
 
+      console.log('🔄 Updating password for teacher:', teacher.id);
+      console.log('   Email:', targetEmail);
+      console.log('   Old hash length:', oldHash.length);
+      console.log('   New hash length:', newPasswordHash.length);
+
       await this.saveTeachers(teachers);
 
-      console.log('✅ Password changed successfully');
+      // Verify it was saved correctly
+      const verifyTeachers = await this.getTeachers();
+      const verifyTeacher = verifyTeachers.find(t => t.email === targetEmail);
+      console.log('   Verification - Teacher found after save:', !!verifyTeacher);
+      if (verifyTeacher) {
+        console.log('   Verification - Hash matches new:', verifyTeacher.passwordHash === newPasswordHash);
+      }
+
       return {
         success: true,
         message: 'Password changed successfully',
       };
-      } catch (err) {
+    } catch (err) {
       console.error('Change password error:', err);
       return {
         success: false,
         message: 'Failed to change password',
       };
-      }
-      }
+    }
+  }
+
+  // CLEAR/RESET DATABASE
+  async clearAllData() {
+    try {
+      await AsyncStorage.removeItem('teachers');
+      await AsyncStorage.removeItem('subjects');
+      await AsyncStorage.removeItem('sections');
+      await AsyncStorage.removeItem('attendance');
+      await AsyncStorage.removeItem('lastTeacherId');
+      await AsyncStorage.removeItem('lastTeacherEmail');
+      console.log('✅ All data cleared from offline database');
+      return { success: true, message: 'All data cleared' };
+    } catch (err) {
+      console.error('❌ Failed to clear data:', err);
+      return { success: false, message: 'Failed to clear data' };
+    }
+  }
+
+  // CLEAR specific data type
+  async clearData(dataType: 'teachers' | 'subjects' | 'sections' | 'attendance') {
+    try {
+      await AsyncStorage.removeItem(dataType);
+      console.log(`✅ ${dataType} cleared`);
+      return { success: true, message: `${dataType} cleared` };
+    } catch (err) {
+      console.error(`❌ Failed to clear ${dataType}:`, err);
+      return { success: false, message: `Failed to clear ${dataType}` };
+    }
+  }
+
+  // REINITIALIZE database with fresh demo data
+  async resetDatabase() {
+    try {
+      await this.clearAllData();
+      await this.initDatabase();
+      console.log('✅ Database reset to initial state with demo data');
+      return { success: true, message: 'Database reset to initial state' };
+    } catch (err) {
+      console.error('❌ Failed to reset database:', err);
+      return { success: false, message: 'Failed to reset database' };
+    }
+  }
+
+  // DELETE SPECIFIC TEACHER by email
+  async deleteTeacherByEmail(email: string) {
+    try {
+      const teachers = await this.getTeachers();
+      const initialCount = teachers.length;
+      
+      const filtered = teachers.filter(t => t.email !== email);
+      
+      if (filtered.length === initialCount) {
+        return {
+          success: false,
+          message: `Teacher with email "${email}" not found`,
+        };
       }
 
-      export const offlineApi = new OfflineAPI();
-
-      export const useOfflineApi = () => {
-      return { offlineApi };
+      await this.saveTeachers(filtered);
+      console.log(`✅ Teacher ${email} deleted (${initialCount} → ${filtered.length})`);
+      return {
+        success: true,
+        message: `Teacher ${email} deleted successfully`,
+        deletedCount: initialCount - filtered.length,
       };
+    } catch (err) {
+      console.error('❌ Failed to delete teacher:', err);
+      return { success: false, message: 'Failed to delete teacher' };
+    }
+  }
+
+  // DELETE SPECIFIC TEACHER by ID
+  async deleteTeacherById(id: string) {
+    try {
+      const teachers = await this.getTeachers();
+      const teacher = teachers.find(t => t.id === id);
+      
+      if (!teacher) {
+        return {
+          success: false,
+          message: `Teacher with ID "${id}" not found`,
+        };
+      }
+
+      const filtered = teachers.filter(t => t.id !== id);
+      await this.saveTeachers(filtered);
+      
+      console.log(`✅ Teacher ${teacher.email} (ID: ${id}) deleted`);
+      return {
+        success: true,
+        message: `Teacher ${teacher.email} deleted successfully`,
+        deletedEmail: teacher.email,
+      };
+    } catch (err) {
+      console.error('❌ Failed to delete teacher:', err);
+      return { success: false, message: 'Failed to delete teacher' };
+    }
+  }
+
+  // LIST ALL TEACHERS
+  async listAllTeachers() {
+    try {
+      const teachers = await this.getTeachers();
+      const teachersList = teachers.map((t, idx) => ({
+        index: idx,
+        id: t.id,
+        email: t.email,
+        fullName: t.fullName,
+        isVerified: t.isVerified,
+      }));
+      
+      console.log('📋 All Teachers:', teachersList);
+      return {
+        success: true,
+        count: teachers.length,
+        teachers: teachersList,
+      };
+    } catch (err) {
+      console.error('❌ Failed to list teachers:', err);
+      return { success: false, message: 'Failed to list teachers', teachers: [] };
+    }
+  }
+}
+
+export const offlineApi = new OfflineAPI();
+
+export const useOfflineApi = () => {
+  return { offlineApi };
+};

@@ -1,0 +1,9 @@
+› It's recommended to commit all changes before proceeding in case you want to revert generated changes.
+- Clearing android
+√ Cleared android code
+- Creating native directory (./android)
+√ Created native directory
+- Updating package.json
+√ Updated package.json | no changes
+- Running prebuild
+√ Finished prebuild

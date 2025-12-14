@@ -109,12 +109,12 @@ export default function TeacherLogin() {
 
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE for login step 1');
-        response = { data: await offlineApi.loginStep1(email.trim(), password) };
+        response = { data: await offlineApi.loginStep1(email.trim(), password.trim()) };
       } else {
         console.log('🔌 Using ONLINE MODE for login step 1');
         response = await apiClient.post('/teacher/login/step1', {
           email: email.trim(),
-          password,
+          password: password.trim(),
         });
       }
 
@@ -164,7 +164,8 @@ export default function TeacherLogin() {
 
       if (OFFLINE_MODE) {
         console.log('📱 Using OFFLINE MODE for login step 2');
-        const apiResponse = await offlineApi.loginStep2(tempToken, scannedQrData.raw);
+        console.log('📧 Passing email from step 1:', email);
+        const apiResponse = await offlineApi.loginStep2(tempToken, scannedQrData.raw, email.trim());
         response = { data: apiResponse };
       } else {
         console.log('🔌 Using ONLINE MODE for login step 2');
@@ -179,7 +180,8 @@ export default function TeacherLogin() {
         await setAuth(
           response.data.token,
           response.data.teacherId,
-          response.data.fullName
+          response.data.fullName,
+          response.data.email || email  // Pass email for offline mode password change
         );
         // Use setTimeout to ensure router is ready
         setTimeout(() => {

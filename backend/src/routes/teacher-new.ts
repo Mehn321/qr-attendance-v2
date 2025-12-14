@@ -285,45 +285,57 @@ router.post('/change-password', authenticateToken, async (req: AuthRequest, res:
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
+    // Trim whitespace
+    const trimmedCurrentPassword = (currentPassword || '').trim();
+    const trimmedNewPassword = (newPassword || '').trim();
+    const trimmedConfirmPassword = (confirmPassword || '').trim();
+
     // Validation
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!trimmedCurrentPassword || !trimmedNewPassword || !trimmedConfirmPassword) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    if (newPassword !== confirmPassword) {
+    if (trimmedNewPassword !== trimmedConfirmPassword) {
       return res.status(400).json({ message: 'New passwords do not match' });
     }
 
-    if (newPassword.length < 8) {
+    if (trimmedNewPassword.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     // Get teacher from DB
+    console.log('🔐 Change password attempt - Teacher ID:', req.teacherId);
     const teacher = await db().get(
       'SELECT * FROM teachers WHERE id = ?',
       [req.teacherId]
     );
 
     if (!teacher) {
+      console.error('❌ Teacher not found in DB:', req.teacherId);
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
+    console.log('👤 Teacher found:', { id: teacher.id, email: teacher.email });
+
     // Verify current password
-    const passwordMatch = await bcryptjs.compare(currentPassword, teacher.passwordHash);
+    console.log('🔑 Verifying current password against stored hash...');
+    const passwordMatch = await bcryptjs.compare(trimmedCurrentPassword, teacher.passwordHash);
+    console.log('✓ Password match result:', passwordMatch);
 
     if (!passwordMatch) {
+      console.error('❌ Current password verification failed');
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
     // Ensure new password is different from current
-    const isSamePassword = await bcryptjs.compare(newPassword, teacher.passwordHash);
+    const isSamePassword = await bcryptjs.compare(trimmedNewPassword, teacher.passwordHash);
     if (isSamePassword) {
       return res.status(400).json({ message: 'New password must be different from current password' });
     }
 
     // Hash new password
     const salt = await bcryptjs.genSalt(10);
-    const newPasswordHash = await bcryptjs.hash(newPassword, salt);
+    const newPasswordHash = await bcryptjs.hash(trimmedNewPassword, salt);
 
     // Update password
     await db().run(

@@ -117,7 +117,7 @@ export default function LoginStep2() {
 
       if (response.success && response.token) {
         // Save auth data
-        await setAuth(response.token, response.teacherId, response.fullName);
+        await setAuth(response.token, response.teacherId, response.fullName, response.email);
 
         // Navigate to dashboard
         router.replace('/teacher/dashboard');

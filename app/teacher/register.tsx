@@ -92,15 +92,15 @@ export default function Register() {
         response = await offlineApi.register(
           email.trim(),
           fullName.trim(),
-          password
+          password.trim()
         );
       } else {
         console.log("🔌 Using ONLINE MODE");
         const apiResponse = await apiClient.post("/teacher/register", {
           email: email.trim(),
           fullName: fullName.trim(),
-          password,
-          confirmPassword,
+          password: password.trim(),
+          confirmPassword: confirmPassword.trim(),
         });
         response = apiResponse.data;
       }

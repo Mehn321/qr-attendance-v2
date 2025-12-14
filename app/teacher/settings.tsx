@@ -84,18 +84,20 @@ export default function Settings() {
 
       if (OFFLINE_MODE) {
         console.log("📱 Using OFFLINE MODE");
+        console.log("👤 Current teacher:", { email: teacher?.email });
         response = await offlineApi.changePassword(
-          currentPassword,
-          newPassword
+          currentPassword.trim(),
+          newPassword.trim(),
+          teacher?.email        // Use email-only for lookup (avoids ID duplication issues)
         );
       } else {
         console.log("🔌 Using ONLINE MODE");
         const apiResponse = await apiClient.post(
           "/teacher/change-password",
           {
-            currentPassword,
-            newPassword,
-            confirmPassword,
+            currentPassword: currentPassword.trim(),
+            newPassword: newPassword.trim(),
+            confirmPassword: confirmPassword.trim(),
           },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -376,10 +378,10 @@ export default function Settings() {
               <TouchableOpacity
                 style={[
                   styles.changePasswordButton,
-                  loading && styles.buttonDisabled,
+                  (loading || !isNewPasswordValid || newPassword !== confirmPassword || currentPassword === newPassword || !currentPassword.trim()) && styles.buttonDisabled,
                 ]}
                 onPress={handleChangePassword}
-                disabled={loading || !isNewPasswordValid}
+                disabled={loading || !isNewPasswordValid || newPassword !== confirmPassword || currentPassword === newPassword || !currentPassword.trim()}
               >
                 {loading ? (
                   <ActivityIndicator color="#fff" />

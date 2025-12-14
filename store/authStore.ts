@@ -5,12 +5,14 @@ import * as SecureStore from "expo-secure-store";
 export interface Teacher {
   teacherId: string;
   fullName: string;
+  email?: string;
 }
 
 export interface AuthState {
   token: string | null;
   teacherId: string | null;
   teacherName: string | null;
+  teacherEmail: string | null;
   teacher: Teacher | null;
   selectedSection: string | null;
   selectedSectionId: string | null;
@@ -19,7 +21,8 @@ export interface AuthState {
   setAuth: (
     token: string,
     teacherId: string,
-    teacherName: string
+    teacherName: string,
+    teacherEmail?: string
   ) => Promise<void>;
   clearAuth: () => Promise<void>;
   logout: () => Promise<void>;
@@ -32,25 +35,31 @@ export const authStore = create<AuthState>((set) => ({
   token: null,
   teacherId: null,
   teacherName: null,
+  teacherEmail: null,
   teacher: null,
   selectedSection: null,
   selectedSectionId: null,
   sessionStartTime: null,
 
-  setAuth: async (token: string, teacherId: string, teacherName: string) => {
+  setAuth: async (token: string, teacherId: string, teacherName: string, teacherEmail?: string) => {
     try {
       await SecureStore.setItemAsync("authToken", token);
       await AsyncStorage.setItem("teacherId", teacherId);
       await AsyncStorage.setItem("teacherName", teacherName);
+      if (teacherEmail) {
+        await AsyncStorage.setItem("teacherEmail", teacherEmail);
+      }
       await AsyncStorage.setItem("sessionStartTime", Date.now().toString());
 
       set({
         token,
         teacherId,
         teacherName,
+        teacherEmail: teacherEmail || null,
         teacher: {
           teacherId,
           fullName: teacherName,
+          email: teacherEmail,
         },
         sessionStartTime: Date.now(),
       });
@@ -64,12 +73,14 @@ export const authStore = create<AuthState>((set) => ({
       await SecureStore.deleteItemAsync("authToken");
       await AsyncStorage.removeItem("teacherId");
       await AsyncStorage.removeItem("teacherName");
+      await AsyncStorage.removeItem("teacherEmail");
       await AsyncStorage.removeItem("sessionStartTime");
 
       set({
         token: null,
         teacherId: null,
         teacherName: null,
+        teacherEmail: null,
         teacher: null,
         selectedSection: null,
         selectedSectionId: null,
@@ -119,6 +130,7 @@ export const authStore = create<AuthState>((set) => ({
       const token = await SecureStore.getItemAsync("authToken");
       const teacherId = await AsyncStorage.getItem("teacherId");
       const teacherName = await AsyncStorage.getItem("teacherName");
+      const teacherEmail = await AsyncStorage.getItem("teacherEmail");
       const sessionStartTime = await AsyncStorage.getItem("sessionStartTime");
       const selectedSectionId = await AsyncStorage.getItem("selectedSectionId");
       const selectedSection = await AsyncStorage.getItem("selectedSection");
@@ -128,10 +140,12 @@ export const authStore = create<AuthState>((set) => ({
           token,
           teacherId,
           teacherName,
+          teacherEmail,
           teacher: teacherName
             ? {
                 teacherId,
                 fullName: teacherName,
+                email: teacherEmail || undefined,
               }
             : null,
           sessionStartTime: sessionStartTime

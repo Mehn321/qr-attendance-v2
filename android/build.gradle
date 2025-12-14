@@ -2,11 +2,11 @@
 
 // Define version constants for all subprojects
 ext {
-    buildToolsVersion = "34.0.0"
-    minSdkVersion = 23
-    compileSdkVersion = 34
-    targetSdkVersion = 34
-    ndkVersion = "26.1.10909125"
+    buildToolsVersion = "35.0.0"
+    minSdkVersion = 24
+    compileSdkVersion = 36
+    targetSdkVersion = 36
+    ndkVersion = "27.0.11902837"
     javaVersion = JavaVersion.VERSION_17
 }
 
@@ -17,8 +17,8 @@ buildscript {
         maven { url 'https://www.jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.2'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
+        classpath 'com.android.tools.build:gradle:8.2.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24'
     }
 }
 

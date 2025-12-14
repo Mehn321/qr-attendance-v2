@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "lolski",
     "name": "QR Attendance",
     "slug": "qr-attendance-v2",
     "version": "1.0.0",
